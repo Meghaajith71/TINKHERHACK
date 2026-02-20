@@ -704,6 +704,37 @@ function getMealPrepAlerts() {
         });
     }
 
+    // Check for items expiring tomorrow
+    const groceries = JSON.parse(localStorage.getItem("groceries")) || [];
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
+    const todayMidnight = new Date(today);
+    todayMidnight.setHours(0, 0, 0, 0);
+    const tomorrowMidnight = new Date(tomorrow);
+    tomorrowMidnight.setHours(0, 0, 0, 0);
+
+    const expiringTomorrow = groceries.filter(item => {
+        if (!item.expiryDate) {
+            return false;
+        }
+        const expiryDate = new Date(item.expiryDate);
+        const expiryMidnight = new Date(expiryDate);
+        expiryMidnight.setHours(0, 0, 0, 0);
+        return expiryMidnight.getTime() === tomorrowMidnight.getTime();
+    });
+
+    // Add alerts for expiring items
+    expiringTomorrow.forEach(item => {
+        alerts.push({
+            type: "expiry",
+            icon: "⏰",
+            title: "Item Expiring Tomorrow",
+            message: `${item.name} is expiring tomorrow. Use it today!`
+        });
+    });
+
     return alerts;
 }
 
