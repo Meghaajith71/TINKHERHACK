@@ -67,7 +67,42 @@ function renderMenuWithConfirm(menuHtml, isConfirmed) {
             </div>
         </div>
     `;
-    document.getElementById("menuDisplay").innerHTML = menuHtml + confirmButton;
+    
+    // Get meal prep alerts and prepend to menu
+    const alerts = getMealPrepAlerts();
+    let alertsHtml = "";
+    
+    if (alerts.length > 0) {
+        alertsHtml = `
+            <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <h3 style="color: white; margin: 0; font-size: 18px;">⏰ Tomorrow's Meal Prep Reminders</h3>
+                    <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 12px;">Get ready for tomorrow's meals</p>
+                </div>
+                <div style="display: grid; gap: 12px;">
+        `;
+        
+        alerts.forEach(alert => {
+            alertsHtml += `
+                <div style="background: rgba(255,255,255,0.95); padding: 12px; border-radius: 8px; border-left: 4px solid #FF6B6B;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 24px;">${alert.icon}</span>
+                        <div>
+                            <p style="margin: 0; font-weight: bold; color: #333; font-size: 14px;">${alert.title}</p>
+                            <p style="margin: 3px 0 0 0; color: #666; font-size: 13px;">${alert.message}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        alertsHtml += `
+                </div>
+            </div>
+        `;
+    }
+    
+    document.getElementById("menuDisplay").innerHTML = alertsHtml + menuHtml + confirmButton;
 }
 
 function confirmMenu() {
@@ -81,6 +116,11 @@ function confirmMenu() {
     };
     localStorage.setItem(confirmedMenuKey, JSON.stringify(payload));
     renderMenuWithConfirm(lastGeneratedMenuHtml, true);
+    
+    // Show meal prep alerts after a short delay
+    setTimeout(() => {
+        displayMealPrepAlertsAsPopup();
+    }, 500);
 }
 
 function resetMenu() {
@@ -91,7 +131,7 @@ function resetMenu() {
 
 function generateMenu() {
 
-    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
     
     // Get user's health condition
     const profileData = JSON.parse(localStorage.getItem("profileData")) || {};
@@ -134,7 +174,8 @@ function generateMenu() {
         ["carbohydrates", "fibre", "vitamin_c"],     // Wednesday
         ["carbohydrates", "protein", "zinc"],        // Thursday
         ["carbohydrates", "vitamin_a", "fibre"],     // Friday
-        ["carbohydrates", "protein", "vitamin_k"]    // Saturday
+        ["carbohydrates", "protein", "vitamin_k"],   // Saturday
+        ["carbohydrates", "fibre", "iron"]           // Sunday
     ];
 
     function getNutrients(item) {
@@ -580,4 +621,155 @@ function searchRecipe(query) {
 }
 function goToGroceries() {
     window.location.href = "groceries.html";
+}
+
+
+// ================= MEAL PREP ALERTS =================
+
+function getMealPrepAlerts() {
+    const confirmedMenu = getConfirmedMenu();
+    
+    if (!confirmedMenu || !confirmedMenu.menuHtml) {
+        return [];
+    }
+
+    const alerts = [];
+    
+    // Extract tomorrow's breakfast from the menu HTML
+    const menuHtml = confirmedMenu.menuHtml;
+    const tomorrowBreakfast = getTomorrowsBreakfast(menuHtml);
+    
+    if (!tomorrowBreakfast) {
+        return alerts;
+    }
+
+    const breakfast = tomorrowBreakfast.toLowerCase();
+
+    // Check conditions and add alerts
+    if (breakfast.includes("idli") || breakfast.includes("dosa")) {
+        alerts.push({
+            type: "prep",
+            icon: "🍚",
+            title: "Batter Preparation",
+            message: "Soak rice, uzhunnu for preparing batter for tomorrow's breakfast"
+        });
+    }
+
+    if (breakfast.includes("kadala curry")) {
+        alerts.push({
+            type: "prep",
+            icon: "🫘",
+            title: "Kadala Soak",
+            message: "Soak kadala for tomorrow's breakfast preparation"
+        });
+    }
+
+    if (breakfast.includes("chicken curry") || breakfast.includes("fish curry")) {
+        const protein = breakfast.includes("chicken") ? "Chicken" : "Fish";
+        alerts.push({
+            type: "prep",
+            icon: "🍗",
+            title: "Marinate Protein",
+            message: `Marinate ${protein} for tomorrow's breakfast`
+        });
+    }
+
+    if (breakfast.includes("appam")) {
+        alerts.push({
+            type: "prep",
+            icon: "🍞",
+            title: "Appam Batter",
+            message: "Soak rice for appam batter preparation"
+        });
+    }
+
+    return alerts;
+}
+
+function getTomorrowsBreakfast(menuHtml) {
+    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
+    const tomorrowIndex = (tomorrow.getDay() + 6) % 7; // Monday = 0
+    
+    // Map day index to day name
+    const dayNames = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+    let tomorrowDayName = dayNames[tomorrowIndex];
+    
+    // If tomorrow is beyond Sunday, return null
+    if (tomorrowIndex > 6) {
+        return null;
+    }
+
+    // Parse the HTML to find tomorrow's breakfast
+    // Look for the day name followed by breakfast content
+    const breakfastRegex = new RegExp(`<h3>${tomorrowDayName}[^<]*<\\/h3>.*?<p><strong>Breakfast:<\\/strong>\\s*([^<]+)<\\/p>`, 'is');
+    const match = menuHtml.match(breakfastRegex);
+    
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+
+    return null;
+}
+
+// Display alerts as popup after confirming
+function displayMealPrepAlertsAsPopup() {
+    const alerts = getMealPrepAlerts();
+    
+    if (alerts.length === 0) {
+        return;
+    }
+
+    // Show popup in the page with overlay
+    let alertsHtml = `
+        <div id="popupOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; max-height: 80vh; overflow-y: auto; border: 3px solid black;">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid black;">
+                    <h2 style="color: black; margin: 0; font-size: 22px;">⏰ Tomorrow's Meal Prep Reminders</h2>
+                    <p style="color: #333; margin: 10px 0 0 0; font-size: 14px;">Get ready for tomorrow's meals</p>
+                </div>
+                <div style="display: grid; gap: 15px; margin-bottom: 20px;">
+    `;
+
+    alerts.forEach(alert => {
+        alertsHtml += `
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 10px; border-left: 4px solid black;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <span style="font-size: 28px; line-height: 1;">${alert.icon}</span>
+                    <div>
+                        <p style="margin: 0; font-weight: bold; color: black; font-size: 15px;">${alert.title}</p>
+                        <p style="margin: 5px 0 0 0; color: #333; font-size: 13px; line-height: 1.4;">${alert.message}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    alertsHtml += `
+                </div>
+                <button onclick="closeMealPrepPopup()" style="width: 100%; padding: 12px; background: black; color: white; border: 2px solid black; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">Got it! Let's Cook 👨‍🍳</button>
+            </div>
+        </div>
+    `;
+
+    // Create a container for the popup
+    let popupContainer = document.getElementById("mealPrepPopup");
+    if (!popupContainer) {
+        popupContainer = document.createElement("div");
+        popupContainer.id = "mealPrepPopup";
+        document.body.appendChild(popupContainer);
+    }
+    
+    popupContainer.innerHTML = alertsHtml;
+}
+
+function closeMealPrepPopup() {
+    const popupContainer = document.getElementById("mealPrepPopup");
+    if (popupContainer) {
+        popupContainer.innerHTML = "";
+        popupContainer.remove();
+    }
 }
