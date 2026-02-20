@@ -297,9 +297,8 @@ function generateMenu() {
         }
 
         let lunch = [];
-        if (!isTooSoon("Rice", dayIndex, lastDayByItem)) {
-            lunch.push("Rice");
-        }
+        // Rice is compulsory for lunch every day
+        lunch.push("Rice");
         let breakfastExtras = [];
         let dinnerExtras = [];
 
