@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile Setup</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ffecd2, #fcb69f);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .profile-box {
+            background: white;
+            width: 400px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            background-color: #ff7e5f;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #e3644a;
+        }
+
+        .secondary-btn {
+            background-color: #777;
+        }
+
+        .secondary-btn:hover {
+            background-color: #555;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-box">
+    <h2>Profile Setup</h2>
+
+    <label>Number of Members</label>
+    <select id="members">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5+</option>
+    </select>
+
+    <label>Food Preference</label>
+    <select id="food">
+        <option>Vegetarian</option>
+        <option>Non-Vegetarian</option>
+        <option>Eggetarian</option>
+        <option>Vegan</option>
+    </select>
+
+    <label>Weekly Grocery Budget (₹)</label>
+    <input type="number" id="budget" placeholder="Enter weekly budget">
+
+    <button class="btn" id="saveBtn" onclick="saveProfile()">Save Profile</button>
+    <button class="btn secondary-btn" onclick="clearProfile()">Clear Profile</button>
+    <button class="btn secondary-btn" onclick="goHome()">Back to Home</button>
+
+    <div class="message" id="msg"></div>
+</div>
+
+<script>
+
+    // Load profile automatically if exists
+    window.onload = function() {
+        const savedProfile = JSON.parse(localStorage.getItem("profileData"));
+
+        if (savedProfile) {
+            document.getElementById("members").value = savedProfile.members;
+            document.getElementById("food").value = savedProfile.foodPreference;
+            document.getElementById("budget").value = savedProfile.weeklyBudget;
+
+            document.getElementById("saveBtn").innerText = "Update Profile";
+            document.getElementById("msg").innerText = "Profile Loaded. You can edit and update.";
+        }
+    };
+
+    function saveProfile() {
+
+        const profileData = {
+            members: document.getElementById("members").value,
+            foodPreference: document.getElementById("food").value,
+            
+            weeklyBudget: document.getElementById("budget").value
+        };
+
+        localStorage.setItem("profileData", JSON.stringify(profileData));
+
+        document.getElementById("saveBtn").innerText = "Update Profile";
+        document.getElementById("msg").innerText = "Profile Saved Successfully!";
+    }
+
+    function clearProfile() {
+        localStorage.removeItem("profileData");
+        location.reload();
+    }
+
+    function goHome() {
+        window.location.href = "index.html";
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MEALSREADY</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<button class="profile-btn" onclick="goToProfile()">👤 PROFILE</button>
+<button class="festive-btn" onclick="goToFestive()">🎉 FESTIVE</button>
+
+<div class="container">
+    <h1>MEALSREADY!</h1>
+
+    <div class="button-group">
+        <button onclick="generateMenu()">MEALS</button>
+        <button onclick="showRecipeOptions()">RECIPE</button>
+        <button onclick="goToGroceries()">GROCERIES</button>
+        <button onclick="showProfile()">PROFILE</button>
+    </div>
+
+    <div id="menuDisplay"></div>
+</div>
+
+<script src="script.js"></script>
+<script>
+function goToProfile() {
+    window.location.href = "profile.html";
+}
+
+function goToFestive() {
+    window.location.href = "festive.html";
+}
+
+function showProfile() {
+    const profileData = JSON.parse(localStorage.getItem("profileData"));
+    
+    if (!profileData) {
+        document.getElementById("menuDisplay").innerHTML = "<p style='text-align:center; font-size:18px;'>No profile data found. Please <button onclick='goToProfile()' style='padding:8px 15px; background:#ff7e5f; color:white; border:none; border-radius:5px; cursor:pointer;'>Create Profile</button></p>";
+        return;
+    }
+    
+    const profileHtml = `
+        <div style="text-align:center; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; max-width:400px; margin:20px auto;">
+            <h2>👤 Your Profile</h2>
+            <p><strong>Number of Members:</strong> ${profileData.members}</p>
+            <p><strong>Food Preference:</strong> ${profileData.foodPreference}</p>
+            <p><strong>Weekly Budget:</strong> ₹${profileData.weeklyBudget}</p>
+            <button onclick='goToProfile()' style='margin-top:15px; padding:8px 15px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;'>Edit Profile</button>
+        </div>
+    `;
+    
+    document.getElementById("menuDisplay").innerHTML = profileHtml;
+}
+</script>
+
+</body>
+
+
+</html>

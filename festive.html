@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Festive Mode - MEALSREADY</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: url("https://images.unsplash.com/photo-1504674900247-0877df9cc836") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 30px auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 50px;
+            color: white;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        .festive-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .festive-btn {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .onam-btn {
+            background: #FFD700;
+            color: #333;
+        }
+
+        .onam-btn:hover {
+            background: #FFC700;
+            transform: scale(1.05);
+        }
+
+        .christmas-btn {
+            background: #DC143C;
+        }
+
+        .christmas-btn:hover {
+            background: #C41E3A;
+            transform: scale(1.05);
+        }
+
+        .ramzaan-btn {
+            background: #006400;
+        }
+
+        .ramzaan-btn:hover {
+            background: #004d00;
+            transform: scale(1.05);
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background: #777;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: #555;
+        }
+
+        #festiveDisplay {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn-add {
+            background: #4CAF50;
+        }
+
+        .btn-add:hover {
+            background: #45a049;
+        }
+
+        .btn-view {
+            background: #2196F3;
+        }
+
+        .btn-view:hover {
+            background: #0b7dda;
+        }
+
+        .btn-remove {
+            background: #f44336;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-remove:hover {
+            background: #da190b;
+        }
+
+        .item-list {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .item-card button {
+            margin-left: 10px;
+        }
+
+        h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: white;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="back-btn" onclick="goBack()">← BACK</button>
+    
+    <h1>🎉 FESTIVE MODE</h1>
+    
+    <div class="festive-buttons">
+        <button class="festive-btn onam-btn" onclick="selectFestival('onam')">🪔 ONAM</button>
+        <button class="festive-btn christmas-btn" onclick="selectFestival('christmas')">🎄 CHRISTMAS</button>
+        <button class="festive-btn ramzaan-btn" onclick="selectFestival('ramzaan')">🌙 RAMZAAN</button>
+    </div>
+
+    <div id="festiveDisplay"></div>
+</div>
+
+<script>
+
+let currentFestival = null;
+
+function goBack() {
+    window.location.href = "index.html";
+}
+
+function selectFestival(festival) {
+    currentFestival = festival;
+    const festivalNames = {
+        onam: "ONAM",
+        christmas: "CHRISTMAS",
+        ramzaan: "RAMZAAN"
+    };
+
+    const festiveDisplay = document.getElementById("festiveDisplay");
+    festiveDisplay.innerHTML = `
+        <h2>🍽️ ${festivalNames[festival]} RECIPES</h2>
+        <div class="form-group">
+            <input type="text" id="foodItem" placeholder="Enter food item name" onkeypress="handleEnter(event)">
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-add" onclick="addFoodItem()">➕ Add Item</button>
+            <button class="btn btn-view" onclick="viewFoodItems()">📋 View List</button>
+        </div>
+        <div id="itemsContainer"></div>
+    `;
+}
+
+function handleEnter(event) {
+    if (event.key === "Enter") {
+        addFoodItem();
+    }
+}
+
+function addFoodItem() {
+    if (!currentFestival) {
+        alert("Please select a festival first!");
+        return;
+    }
+
+    const foodInput = document.getElementById("foodItem");
+    const foodItem = foodInput.value.trim();
+
+    if (foodItem === "") {
+        alert("Please enter a food item name!");
+        return;
+    }
+
+    let festivities = JSON.parse(localStorage.getItem("festivities")) || {};
+    if (!festivities[currentFestival]) {
+        festivities[currentFestival] = [];
+    }
+
+    festivities[currentFestival].push({
+        id: Date.now(),
+        name: foodItem
+    });
+
+    localStorage.setItem("festivities", JSON.stringify(festivities));
+    foodInput.value = "";
+    alert("Food item added successfully!");
+    viewFoodItems();
+}
+
+function viewFoodItems() {
+    if (!currentFestival) {
+        alert("Please select a festival first!");
+        return;
+    }
+
+    let festivities = JSON.parse(localStorage.getItem("festivities")) || {};
+    const festivalItems = festivities[currentFestival] || [];
+
+    const itemsContainer = document.getElementById("itemsContainer");
+
+    if (festivalItems.length === 0) {
+        itemsContainer.innerHTML = "<p style='margin-top:20px;'>No items added yet.</p>";
+        return;
+    }
+
+    let listHTML = "<div class='item-list'><h3>📝 Your Items:</h3>";
+    
+    festivalItems.forEach((item) => {
+        listHTML += `
+            <div class="item-card">
+                <span>${item.name}</span>
+                <button class="btn btn-remove" onclick="removeItem('${currentFestival}', ${item.id})">✕ Delete</button>
+            </div>
+        `;
+    });
+
+    listHTML += "</div>";
+    itemsContainer.innerHTML = listHTML;
+}
+
+function removeItem(festival, itemId) {
+    if (confirm("Are you sure you want to delete this item?")) {
+        let festivities = JSON.parse(localStorage.getItem("festivities")) || {};
+        festivities[festival] = festivities[festival].filter(item => item.id !== itemId);
+        localStorage.setItem("festivities", JSON.stringify(festivities));
+        viewFoodItems();
+    }
+}
+
+</script>
+
+</body>
+</html>
