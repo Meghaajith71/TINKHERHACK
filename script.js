@@ -263,7 +263,8 @@ function generateMenu() {
         weeklyMenu = `<div style="text-align:center; background:rgba(76, 175, 80, 0.2); padding:15px; border-radius:10px; margin-bottom:20px;"><h3 style="color: #4CAF50; margin:0;">💊 Health-Customized Menu for: ${userHealthCondition}</h3></div>`;
     }
 
-    days.forEach((day, dayIndex) => {
+    // Generate menu for entire week
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
         const currentDate = new Date(today);
         currentDate.setDate(today.getDate() + dayIndex);
         const dateLabel = currentDate.toDateString();
@@ -471,7 +472,7 @@ function generateMenu() {
 
         weeklyMenu += `
             <div style="margin-bottom:20px;">
-                <h3>${day} - ${dateLabel}</h3>
+                <h3>${dateLabel}</h3>
                 <p><strong>Breakfast:</strong> ${breakfastDetails}</p>
                 <p><strong>Lunch:</strong> ${lunch.join(", ")}</p>
                 <p><strong>Dinner:</strong> ${dinnerDetails}</p>
@@ -479,7 +480,7 @@ function generateMenu() {
                 <p style="color: #FFD700; font-size: 12px;"><strong>Nutrients:</strong> ${dayNutrientsList}</p>
             </div>
         `;
-    });
+    }
 
     lastGeneratedMenuHtml = weeklyMenu;
     renderMenuWithConfirm(weeklyMenu, false);
@@ -740,25 +741,16 @@ function getMealPrepAlerts() {
 }
 
 function getTomorrowsBreakfast(menuHtml) {
-    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     
-    const tomorrowIndex = (tomorrow.getDay() + 6) % 7; // Monday = 0
+    // Get tomorrow's date string in the format used in HTML (e.g., "Sun Feb 22 2026")
+    const tomorrowDateString = tomorrow.toDateString();
     
-    // Map day index to day name
-    const dayNames = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-    let tomorrowDayName = dayNames[tomorrowIndex];
-    
-    // If tomorrow is beyond Sunday, return null
-    if (tomorrowIndex > 6) {
-        return null;
-    }
-
-    // Parse the HTML to find tomorrow's breakfast
-    // Look for the day name followed by breakfast content
-    const breakfastRegex = new RegExp(`<h3>${tomorrowDayName}[^<]*<\\/h3>.*?<p><strong>Breakfast:<\\/strong>\\s*([^<]+)<\\/p>`, 'is');
+    // Parse the HTML to find tomorrow's breakfast using the date
+    // Look for the date followed by breakfast content
+    const breakfastRegex = new RegExp(`<h3>${tomorrowDateString}<\\/h3>.*?<p><strong>Breakfast:<\\/strong>\\s*([^<]+)<\\/p>`, 'is');
     const match = menuHtml.match(breakfastRegex);
     
     if (match && match[1]) {
