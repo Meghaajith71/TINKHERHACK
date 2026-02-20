@@ -98,6 +98,15 @@
     <label>Weekly Grocery Budget (₹)</label>
     <input type="number" id="budget" placeholder="Enter weekly budget">
 
+    <label>Health Condition (Optional)</label>
+    <select id="healthCondition">
+        <option value="">None</option>
+        <option value="Diabetic">Diabetic</option>
+        <option value="Anemia">Anemia</option>
+        <option value="Weight Loss">Weight Loss</option>
+        <option value="High Protein">High Protein Diet</option>
+    </select>
+
     <button class="btn" id="saveBtn" onclick="saveProfile()">Save Profile</button>
     <button class="btn secondary-btn" onclick="clearProfile()">Clear Profile</button>
     <button class="btn secondary-btn" onclick="goHome()">Back to Home</button>
@@ -115,6 +124,7 @@
             document.getElementById("members").value = savedProfile.members;
             document.getElementById("food").value = savedProfile.foodPreference;
             document.getElementById("budget").value = savedProfile.weeklyBudget;
+            document.getElementById("healthCondition").value = savedProfile.healthCondition || "";
 
             document.getElementById("saveBtn").innerText = "Update Profile";
             document.getElementById("msg").innerText = "Profile Loaded. You can edit and update.";
@@ -125,8 +135,8 @@
 
         const profileData = {
             members: document.getElementById("members").value,
-            foodPreference: document.getElementById("food").value,
-            
+            weeklyBudget: document.getElementById("budget").value,
+            healthCondition: document.getElementById("healthCondition
             weeklyBudget: document.getElementById("budget").value
         };
 

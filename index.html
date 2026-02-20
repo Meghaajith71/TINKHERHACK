@@ -18,6 +18,7 @@
         <button onclick="showRecipeOptions()">RECIPE</button>
         <button onclick="goToGroceries()">GROCERIES</button>
         <button onclick="showProfile()">PROFILE</button>
+        <button onclick="showHealthCustomization()">💊 HEALTH</button>
     </div>
 
     <div id="menuDisplay"></div>
@@ -33,6 +34,47 @@ function goToFestive() {
     window.location.href = "festive.html";
 }
 
+function showHealthCustomization() {
+    const profileData = JSON.parse(localStorage.getItem("profileData"));
+    const currentHealth = profileData?.healthCondition || "";
+    
+    const healthHtml = `
+        <div style="text-align:center; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; max-width:500px; margin:20px auto;">
+            <h2>💊 Health Customization</h2>
+            <p style="margin-bottom:20px;">Select a health condition for personalized meal recommendations:</p>
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button style="padding:12px; background:${currentHealth === "" ? "#4CAF50" : "#666"}; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;" 
+                    onclick="setHealthCondition('')">None (Default)</button>
+                <button style="padding:12px; background:${currentHealth === "Diabetic" ? "#4CAF50" : "#666"}; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;" 
+                    onclick="setHealthCondition('Diabetic')">🩺 Diabetic</button>
+                <button style="padding:12px; background:${currentHealth === "Anemia" ? "#4CAF50" : "#666"}; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;" 
+                    onclick="setHealthCondition('Anemia')">🩸 Anemia</button>
+                <button style="padding:12px; background:${currentHealth === "Weight Loss" ? "#4CAF50" : "#666"}; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;" 
+                    onclick="setHealthCondition('Weight Loss')">⚖️ Weight Loss</button>
+                <button style="padding:12px; background:${currentHealth === "High Protein" ? "#4CAF50" : "#666"}; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;" 
+                    onclick="setHealthCondition('High Protein')">💪 High Protein Diet</button>
+            </div>
+            
+            ${currentHealth ? `<p style="margin-top:20px; font-size:14px; color:#FFD700;"><strong>Current Selection:</strong> ${currentHealth}</p>` : ""}
+        </div>
+    `;
+    
+    document.getElementById("menuDisplay").innerHTML = healthHtml;
+}
+
+function setHealthCondition(condition) {
+    let profileData = JSON.parse(localStorage.getItem("profileData")) || {};
+    profileData.healthCondition = condition;
+    localStorage.setItem("profileData", JSON.stringify(profileData));
+    
+    document.getElementById("menuDisplay").innerHTML = `<p style="text-align:center; font-size:18px; color:#4CAF50;"><strong>✓ Health condition updated to: ${condition || "Default"}</strong></p>`;
+    
+    setTimeout(() => {
+        showHealthCustomization();
+    }, 1000);
+}
+
 function showProfile() {
     const profileData = JSON.parse(localStorage.getItem("profileData"));
     
@@ -41,12 +83,15 @@ function showProfile() {
         return;
     }
     
+    const healthCondition = profileData.healthCondition || "Not Set";
+    
     const profileHtml = `
         <div style="text-align:center; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; max-width:400px; margin:20px auto;">
             <h2>👤 Your Profile</h2>
             <p><strong>Number of Members:</strong> ${profileData.members}</p>
             <p><strong>Food Preference:</strong> ${profileData.foodPreference}</p>
             <p><strong>Weekly Budget:</strong> ₹${profileData.weeklyBudget}</p>
+            <p><strong>Health Condition:</strong> ${healthCondition}</p>
             <button onclick='goToProfile()' style='margin-top:15px; padding:8px 15px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;'>Edit Profile</button>
         </div>
     `;

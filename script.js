@@ -2,6 +2,40 @@
 let lastGeneratedMenuHtml = "";
 const confirmedMenuKey = "confirmedMenu";
 
+// Health Condition Mapping for Foods
+const healthConditionFoodsMap = {
+    "": { // No specific condition - all foods available
+        breakfast: ["Dosa", "Idli", "Upma", "Oats", "Chappathi", "Appam", "Puttu"],
+        lunch: ["Cabbage thoran", "Pappadam", "Fish curry", "Soya fry", "Chicken curry", "Aviyal", "Beans thoran"],
+        dinner: ["Chappathi", "Kappa", "Sweet Potato", "Oats"],
+        curry: ["Vegetable kuruma", "Chicken curry", "Egg curry", "Kadala curry", "Sambaar", "Fish curry"]
+    },
+    "Diabetic": {
+        breakfast: ["Upma", "Oats", "Chappathi"],
+        lunch: ["Cabbage thoran", "Soya fry", "Chicken curry", "Aviyal", "Beans thoran"],
+        dinner: ["Chappathi", "Sweet Potato", "Oats"],
+        curry: ["Vegetable kuruma", "Chicken curry", "Egg curry", "Kadala curry", "Sambaar"]
+    },
+    "Anemia": {
+        breakfast: ["Oats", "Chappathi"],
+        lunch: ["Cabbage thoran", "Soya fry", "Chicken curry", "Aviyal", "Beans thoran"],
+        dinner: ["Sweet Potato", "Oats"],
+        curry: ["Vegetable kuruma", "Chicken curry", "Egg curry", "Kadala curry", "Sambaar"]
+    },
+    "Weight Loss": {
+        breakfast: ["Upma", "Oats", "Chappathi"],
+        lunch: ["Cabbage thoran", "Soya fry", "Chicken curry", "Aviyal", "Beans thoran"],
+        dinner: ["Chappathi", "Sweet Potato", "Oats"],
+        curry: ["Vegetable kuruma", "Chicken curry", "Egg curry", "Kadala curry", "Sambaar"]
+    },
+    "High Protein": {
+        breakfast: ["Oats", "Chappathi"],
+        lunch: ["Soya fry", "Chicken curry", "Beans thoran"],
+        dinner: ["Chappathi", "Oats"],
+        curry: ["Chicken curry", "Egg curry", "Kadala curry", "Soya fry"]
+    }
+};
+
 window.addEventListener("load", () => {
     localStorage.removeItem(confirmedMenuKey);
 });
@@ -58,9 +92,15 @@ function resetMenu() {
 function generateMenu() {
 
     const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-    const breakfastItems = ["Dosa", "Idli", "Upma","Oats","Chappathi", "Appam", "Puttu"];
-    const extraLunchItems = ["Cabbage thoran", "Pappadam", "Fish curry", "Soya fry", "Chicken curry", "Aviyal", "Beans thoran"];
-    const dinnerItems = ["Chappathi", "Kappa","Sweet Potato","Oats"];
+    
+    // Get user's health condition
+    const profileData = JSON.parse(localStorage.getItem("profileData")) || {};
+    const userHealthCondition = profileData.healthCondition || "";
+    const healthFoods = healthConditionFoodsMap[userHealthCondition] || healthConditionFoodsMap[""];
+    
+    const breakfastItems = healthFoods.breakfast;
+    const extraLunchItems = healthFoods.lunch;
+    const dinnerItems = healthFoods.dinner;
 
     // Nutrition mapping for food items
     const nutrients = {
@@ -161,6 +201,11 @@ function generateMenu() {
     let weeklyMenu = "";
     const lastDayByItem = {};
 
+    // Add health condition header if selected
+    if (userHealthCondition) {
+        weeklyMenu = `<div style="text-align:center; background:rgba(76, 175, 80, 0.2); padding:15px; border-radius:10px; margin-bottom:20px;"><h3 style="color: #4CAF50; margin:0;">💊 Health-Customized Menu for: ${userHealthCondition}</h3></div>`;
+    }
+
     days.forEach((day, dayIndex) => {
         const currentDate = new Date(today);
         currentDate.setDate(today.getDate() + dayIndex);
@@ -171,24 +216,26 @@ function generateMenu() {
 
         // Rule 1: Appam curry should be vegetable kuruma or chicken curry or egg curry
         if (breakfast === "Appam") {
-            const appamCurries = ["Vegetable kuruma", "Chicken curry", "Egg curry"];
-            breakfastCurry = pickFromList(appamCurries, dayIndex, lastDayByItem);
+            const appamCurries = ["Vegetable kuruma", "Chicken curry", "Egg curry"].filter(c => healthFoods.curry.includes(c));
+            breakfastCurry = appamCurries.length > 0 ? pickFromList(appamCurries, dayIndex, lastDayByItem) : healthFoods.curry[0];
         }
         // Rule 3: Puttu curry should be pappadam or kadala curry or egg curry
         else if (breakfast === "Puttu") {
-            const puttuCurries = ["Pappadam", "Kadala curry", "Egg curry"];
-            breakfastCurry = pickFromList(puttuCurries, dayIndex, lastDayByItem);
+            const puttuCurries = ["Pappadam", "Kadala curry", "Egg curry"].filter(c => healthFoods.curry.includes(c));
+            breakfastCurry = puttuCurries.length > 0 ? pickFromList(puttuCurries, dayIndex, lastDayByItem) : healthFoods.curry[0];
         }
         // For Chappathi, curry should not be Pappadam
         else if (breakfast === "Chappathi") {
-            const chappathiCurries = ["Sambaar", "Vegetable kuruma", "Chicken curry", "Egg curry"];
-            breakfastCurry = pickFromList(chappathiCurries, dayIndex, lastDayByItem);
+            const chappathiCurries = ["Sambaar", "Vegetable kuruma", "Chicken curry", "Egg curry"].filter(c => healthFoods.curry.includes(c));
+            breakfastCurry = chappathiCurries.length > 0 ? pickFromList(chappathiCurries, dayIndex, lastDayByItem) : healthFoods.curry[0];
         }
         // Default cases
         else if (breakfast === "Dosa" || breakfast === "Idli") {
-            breakfastCurry = pickFromList(["Sambaar"], dayIndex, lastDayByItem);
+            const sambarList = healthFoods.curry.includes("Sambaar") ? ["Sambaar"] : [healthFoods.curry[0]];
+            breakfastCurry = pickFromList(sambarList, dayIndex, lastDayByItem);
         } else {
-            breakfastCurry = pickFromList(["Pappadam"], dayIndex, lastDayByItem);
+            const pappadamList = healthFoods.curry.includes("Pappadam") ? ["Pappadam"] : [healthFoods.curry[0]];
+            breakfastCurry = pickFromList(pappadamList, dayIndex, lastDayByItem);
         }
 
         let lunch = [];
@@ -202,34 +249,58 @@ function generateMenu() {
             .filter(item => dayIndex <= item.diffDays)
             .map(item => item.name);
 
+        // Add Sambaar or curry to lunch
+        let sambaarinaAdded = false;
         if (breakfastCurry === "Sambaar") {
             if (!isTooSoon("Sambaar", dayIndex, lastDayByItem)) {
                 lunch.push("Sambaar");
+                sambaarinaAdded = true;
             }
         } else if (Math.random() > 0.5) {
             if (!isTooSoon("Sambaar", dayIndex, lastDayByItem)) {
                 lunch.push("Sambaar");
+                sambaarinaAdded = true;
             }
         }
 
-        let randomLunchItem = null;
+        // Add lunch items to reach at least 2 food items
+        let lunchItemsNeeded = 2;
+        let addedCount = lunch.length;
         let attempts = 0;
-        const dailyNutrients = dailyNutritionPlan[dayIndex];
+        const maxAttempts = extraLunchItems.length * 2;
 
-        while (attempts < extraLunchItems.length) {
+        while (addedCount < lunchItemsNeeded && attempts < maxAttempts) {
             const candidate = extraLunchItems[Math.floor(Math.random() * extraLunchItems.length)];
-            const tooSoon = isTooSoon(candidate, dayIndex, lastDayByItem);
-
-            if (!tooSoon) {
-                randomLunchItem = candidate;
-                break;
+            const alreadyInLunch = lunch.some(item => item.toLowerCase() === candidate.toLowerCase());
+            
+            if (!alreadyInLunch) {
+                const tooSoon = isTooSoon(candidate, dayIndex, lastDayByItem);
+                
+                if (!tooSoon) {
+                    lunch.push(candidate);
+                    addedCount++;
+                }
             }
-
-            attempts += 1;
+            attempts++;
         }
 
-        if (randomLunchItem) {
-            lunch.push(randomLunchItem);
+        // If still not enough items, add without checking "too soon" rule
+        while (addedCount < lunchItemsNeeded && extraLunchItems.length > 0) {
+            const candidate = extraLunchItems[Math.floor(Math.random() * extraLunchItems.length)];
+            const alreadyInLunch = lunch.some(item => item.toLowerCase() === candidate.toLowerCase());
+            
+            if (!alreadyInLunch) {
+                lunch.push(candidate);
+                addedCount++;
+            }
+        }
+
+        // Final fallback: ensure at least 2 items
+        if (lunch.length < 2 && extraLunchItems.length > 0) {
+            const fallbackItem = extraLunchItems[Math.floor(Math.random() * extraLunchItems.length)];
+            if (!lunch.some(item => item.toLowerCase() === fallbackItem.toLowerCase())) {
+                lunch.push(fallbackItem);
+            }
         }
 
         requiredItems.forEach(itemName => {
@@ -273,23 +344,25 @@ function generateMenu() {
 
         // Rule 4: If breakfast contains chicken curry and if dinner contains chappathi or kappa then curry should be chicken curry
         if (breakfastCurry === "Chicken curry" && (dinner === "Chappathi" || dinner === "Kappa")) {
-            dinnerCurry = "Chicken curry";
+            dinnerCurry = healthFoods.curry.includes("Chicken curry") ? "Chicken curry" : healthFoods.curry[0];
         }
         // Rule 2: If breakfast contains chicken curry then lunch or dinner should alternatively contain chicken curry
         else if (breakfastCurry === "Chicken curry") {
             // If lunch doesn't have chicken curry, dinner can have it; otherwise use alternatives
             const hasChickenInLunch = lunch.includes("Chicken curry");
-            const options = hasChickenInLunch
+            const baseOptions = hasChickenInLunch
                 ? ["Fish curry", "Egg curry", "Vegetable kuruma"]
                 : ["Chicken curry", "Fish curry", "Egg curry", "Vegetable kuruma"];
-            dinnerCurry = pickPreferred(options, dayIndex, lastDayByItem);
+            const options = baseOptions.filter(c => healthFoods.curry.includes(c));
+            dinnerCurry = options.length > 0 ? pickPreferred(options, dayIndex, lastDayByItem) : healthFoods.curry[0];
         }
         // Default dinner curry logic
         else {
-            const options = lunch.includes("Fish curry")
+            const baseOptions = lunch.includes("Fish curry")
                 ? ["Fish curry", "Egg curry"]
                 : (dinner === "Chappathi" ? ["Egg curry", "Fish curry"] : ["Fish curry", "Egg curry"]);
-            dinnerCurry = pickPreferred(options, dayIndex, lastDayByItem);
+            const options = baseOptions.filter(c => healthFoods.curry.includes(c));
+            dinnerCurry = options.length > 0 ? pickPreferred(options, dayIndex, lastDayByItem) : healthFoods.curry[0];
         }
 
         const usedToday = new Set();
