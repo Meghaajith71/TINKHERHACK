@@ -385,6 +385,17 @@ function generateMenu() {
         const dateLabel = currentDate.toDateString();
 
         let breakfast = pickFromList(breakfastItems, dayIndex, lastDayByItem);
+        let breakfastDisplay = breakfast;
+        
+        // Use leftover as breakfast for tomorrow if it exists
+        if (dayIndex === 1) {
+            const leftover = getLeftoverForTomorrow();
+            if (leftover) {
+                breakfast = leftover;
+                breakfastDisplay = "leftover - " + leftover;
+            }
+        }
+        
         let breakfastCurry = "";
 
         // Apply leftovers mapping for tomorrow's breakfast only
@@ -612,8 +623,8 @@ function generateMenu() {
         const dayNutrientsList = Array.from(dayNutrients).map(nut => nut.replace(/_/g, " ").toUpperCase()).join(", ");
 
         const breakfastDetails = breakfastExtras.length > 0
-            ? `${breakfast} - ${breakfastCurry}, ${breakfastExtras.join(", ")}`
-            : `${breakfast} - ${breakfastCurry}`;
+            ? `${breakfastDisplay} - ${breakfastCurry}, ${breakfastExtras.join(", ")}`
+            : `${breakfastDisplay} - ${breakfastCurry}`;
 
         const dinnerDetails = dinnerExtras.length > 0
             ? `${dinner} - ${dinnerCurry}, ${dinnerExtras.join(", ")}`
@@ -798,6 +809,193 @@ function searchRecipe(query) {
 }
 function goToGroceries() {
     window.location.href = "groceries.html";
+}
+
+// ================= LEFTOVER SECTION =================
+
+function showLeftoverOptions() {
+    document.getElementById("menuDisplay").innerHTML = `
+        <div style="text-align:center; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; max-width:500px; margin:20px auto;">
+            <h2>♻️ Leftover Management</h2>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+                <button onclick="showAddLeftover()" style="padding:12px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">+ Add Leftover</button>
+                <button onclick="viewLeftovers()" style="padding:12px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">📋 View Leftovers</button>
+            </div>
+        </div>
+    `;
+}
+
+function showAddLeftover(editIndex = null) {
+    let leftover = { name: "" };
+
+    if (editIndex !== null) {
+        let leftovers = JSON.parse(localStorage.getItem("leftovers")) || [];
+        leftover = leftovers[editIndex];
+    }
+
+    document.getElementById("menuDisplay").innerHTML = `
+        <div style="max-width:500px; margin:20px auto;">
+            <h2>${editIndex !== null ? "Edit Leftover" : "Add Leftover"}</h2>
+            <form onsubmit="saveLeftover(event, ${editIndex})" style="display:flex; flex-direction:column; gap:10px;">
+                <input type="text" id="leftoverName" placeholder="Leftover Item Name" value="${leftover.name}" required>
+                <button type="submit" style="padding:10px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">${editIndex !== null ? "Update" : "Add"} Leftover</button>
+                <button type="button" onclick="viewLeftovers()" style="padding:10px; background:#666; color:white; border:none; border-radius:5px; cursor:pointer;">Back</button>
+            </form>
+        </div>
+    `;
+}
+
+function saveLeftover(event, editIndex = null) {
+    event.preventDefault();
+
+    const name = document.getElementById("leftoverName").value;
+
+    let leftovers = JSON.parse(localStorage.getItem("leftovers")) || [];
+
+    if (editIndex !== null && editIndex !== undefined) {
+        leftovers[editIndex] = { name };
+    } else {
+        leftovers.push({ name });
+    }
+
+    localStorage.setItem("leftovers", JSON.stringify(leftovers));
+    viewLeftovers();
+}
+
+function viewLeftovers() {
+    let leftovers = JSON.parse(localStorage.getItem("leftovers")) || [];
+    const activeLeftoverIndex = JSON.parse(localStorage.getItem("activeLeftover")) || null;
+
+    if (leftovers.length === 0) {
+        document.getElementById("menuDisplay").innerHTML = `
+            <div style="text-align:center; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; max-width:500px; margin:20px auto;">
+                <p>No leftovers added yet.</p>
+                <button onclick="showAddLeftover()" style="padding:10px 20px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:10px;">+ Add Leftover</button>
+            </div>
+        `;
+        return;
+    }
+
+    let output = `
+        <div style="max-width:500px; margin:20px auto;">
+            <h2>📋 Your Leftovers</h2>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+    `;
+
+    leftovers.forEach((leftover, index) => {
+        const isActive = activeLeftoverIndex === index;
+        const statusText = isActive ? "✓ SET FOR TOMORROW" : "Not Set";
+        const statusColor = isActive ? "#4CAF50" : "#999";
+        
+        output += `
+            <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:8px; border-left:4px solid #FF9800;">
+                <h3 style="margin:0 0 10px 0;">${leftover.name}</h3>
+                <p style="margin:0 0 10px 0; font-size:12px; color:${statusColor};"><strong>${statusText}</strong></p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button onclick="setActiveLeftover(${index})" style="padding:8px 12px; background:${isActive ? '#4CAF50' : '#FF9800'}; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold;">Set</button>
+                    <button onclick="showAddLeftover(${index})" style="padding:8px 12px; background:#2196F3; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px;">Edit</button>
+                    <button onclick="deleteLeftover(${index})" style="padding:8px 12px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px;">Delete</button>
+                </div>
+            </div>
+        `;
+    });
+
+    output += `
+            </div>
+            <button onclick="showLeftoverOptions()" style="width:100%; padding:10px; background:#666; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:20px;">Back</button>
+        </div>
+    `;
+
+    document.getElementById("menuDisplay").innerHTML = output;
+}
+
+function deleteLeftover(index) {
+    let leftovers = JSON.parse(localStorage.getItem("leftovers")) || [];
+    const activeLeftoverIndex = JSON.parse(localStorage.getItem("activeLeftover"));
+    
+    leftovers.splice(index, 1);
+    localStorage.setItem("leftovers", JSON.stringify(leftovers));
+    
+    // If deleted item was the active one, clear the active selection
+    if (activeLeftoverIndex === index) {
+        localStorage.removeItem("activeLeftover");
+    }
+    // If deleted item was before the active one, adjust the index
+    else if (activeLeftoverIndex !== null && activeLeftoverIndex > index) {
+        localStorage.setItem("activeLeftover", JSON.stringify(activeLeftoverIndex - 1));
+    }
+    
+    viewLeftovers();
+}
+
+function setActiveLeftover(index) {
+    localStorage.setItem("activeLeftover", JSON.stringify(index));
+    
+    let leftovers = JSON.parse(localStorage.getItem("leftovers")) || [];
+    if (index >= leftovers.length) return;
+    
+    const leftoverName = leftovers[index].name;
+    
+    // Get the confirmed menu
+    const confirmedMenu = getConfirmedMenu();
+    
+    if (confirmedMenu && confirmedMenu.menuHtml) {
+        // Modify the HTML to show the leftover in tomorrow's breakfast
+        // Keep all other meals the same - don't regenerate
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const tomorrowDateString = tomorrow.toDateString();
+        
+        let modifiedHtml = confirmedMenu.menuHtml;
+        
+        // Determine curry for the leftover based on health condition
+        const healthCondition = JSON.parse(localStorage.getItem("profileData"))?.healthCondition || "";
+        const healthFoods = healthConditionFoodsMap[healthCondition] || healthConditionFoodsMap[""];
+        
+        let curry = "";
+        if (leftoverName === "Appam") {
+            const appamCurries = ["Vegetable kuruma", "Chicken curry", "Egg curry"].filter(c => healthFoods.curry.includes(c));
+            curry = appamCurries.length > 0 ? appamCurries[0] : healthFoods.curry[0];
+        } else if (leftoverName === "Puttu") {
+            const puttuCurries = ["Pappadam", "Kadala curry", "Egg curry"].filter(c => healthFoods.curry.includes(c));
+            curry = puttuCurries.length > 0 ? puttuCurries[0] : healthFoods.curry[0];
+        } else if (leftoverName === "Chappathi") {
+            const chappathiCurries = ["Sambaar", "Vegetable kuruma", "Chicken curry", "Egg curry"].filter(c => healthFoods.curry.includes(c));
+            curry = chappathiCurries.length > 0 ? chappathiCurries[0] : healthFoods.curry[0];
+        } else if (leftoverName === "Dosa" || leftoverName === "Idli") {
+            curry = healthFoods.curry.includes("Sambaar") ? "Sambaar" : healthFoods.curry[0];
+        } else {
+            curry = healthFoods.curry.includes("Pappadam") ? "Pappadam" : healthFoods.curry[0];
+        }
+        
+        const newBreakfast = `leftover - ${leftoverName} - ${curry}`;
+        
+        // Replace only tomorrow's breakfast in the HTML, keep everything else
+        const escapedDate = tomorrowDateString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const breakfastRegex = new RegExp(
+            `(<h3>${escapedDate}<\\/h3>.*?<p><strong>Breakfast:<\\/strong>\\s*)([^<]+)(?=<\\/p>)`,
+            's'
+        );
+        
+        modifiedHtml = modifiedHtml.replace(breakfastRegex, `$1${newBreakfast}`);
+        
+        lastGeneratedMenuHtml = modifiedHtml;
+        renderMenuWithConfirm(modifiedHtml, true);
+    } else {
+        // No confirmed menu yet, generate one with the leftover
+        generateMenu();
+    }
+}
+
+function getLeftoverForTomorrow() {
+    let leftovers = JSON.parse(localStorage.getItem("leftovers")) || [];
+    const activeLeftoverIndex = JSON.parse(localStorage.getItem("activeLeftover"));
+    
+    if (activeLeftoverIndex !== null && activeLeftoverIndex < leftovers.length) {
+        return leftovers[activeLeftoverIndex].name;
+    }
+    return null;
 }
 
 
