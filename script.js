@@ -36,6 +36,22 @@ const healthConditionFoodsMap = {
     }
 };
 
+// Fruits pool to show below dinner each day
+const fruitsPool = [
+    "Apple",
+    "Orange",
+    "Pomegranate",
+    "Grapes",
+    "Kiwi",
+    "Cherry",
+    "Star Fruit",
+    "Pineapple",
+    "Guava",
+    "Plum",
+    "Dates",
+    "Watermelon"
+];
+
 window.addEventListener("load", () => {
     localStorage.removeItem(confirmedMenuKey);
 });
@@ -407,12 +423,18 @@ function generateMenu() {
             ? `${dinner} - ${dinnerCurry}, ${dinnerExtras.join(", ")}`
             : `${dinner} - ${dinnerCurry}`;
 
+        // Pick fruits for the day (deterministic rotation to ensure variety)
+        const fruit1 = fruitsPool[dayIndex % fruitsPool.length];
+        const fruit2 = fruitsPool[(dayIndex + 3) % fruitsPool.length];
+        const fruitList = fruit1 === fruit2 ? fruit1 : `${fruit1}, ${fruit2}`;
+
         weeklyMenu += `
             <div style="margin-bottom:20px;">
                 <h3>${day} - ${dateLabel}</h3>
                 <p><strong>Breakfast:</strong> ${breakfastDetails}</p>
                 <p><strong>Lunch:</strong> ${lunch.join(", ")}</p>
                 <p><strong>Dinner:</strong> ${dinnerDetails}</p>
+                <p><strong>Fruits:</strong> ${fruitList}</p>
                 <p style="color: #FFD700; font-size: 12px;"><strong>Nutrients:</strong> ${dayNutrientsList}</p>
             </div>
         `;

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Profile Setup</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', Arial, sans-serif;
             background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
                               url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1650&q=80');
             background-attachment: fixed;
@@ -16,65 +17,110 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: #33221a;
         }
 
         .profile-box {
-            background: rgba(255,255,255,0.9);
-            width: 400px;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
-            backdrop-filter: blur(6px);
+            background: rgba(255,255,255,0.97);
+            width: 420px;
+            padding: 34px;
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+            text-align: left;
+            backdrop-filter: blur(8px) saturate(100%);
+            border: 1px solid rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-box::before {
+            content: "";
+            position: absolute;
+            top: -40px;
+            right: -60px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle at 30% 30%, rgba(0,0,0,0.06), rgba(0,0,0,0));
+            transform: rotate(25deg);
         }
 
         h2 {
-            margin-bottom: 20px;
-            color: #333;
+            margin: 0 0 14px 0;
+            color: #111111;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #333333;
+            font-size: 13px;
+            margin-bottom: 18px;
         }
 
         label {
             display: block;
-            margin-top: 15px;
-            font-weight: bold;
+            margin-top: 14px;
+            font-weight: 600;
             text-align: left;
+            color: #111111;
+            font-size: 13px;
         }
 
         select, input {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            padding: 10px 12px;
+            margin-top: 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.12);
+            background: #ffffff;
+            color: #111111;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            border-color: rgba(0,0,0,0.45);
         }
 
         .btn {
-            margin-top: 15px;
-            padding: 10px;
+            margin-top: 16px;
+            padding: 11px;
             width: 100%;
             border: none;
-            border-radius: 8px;
-            background-color: #ff7e5f;
-            color: white;
+            border-radius: 10px;
+            background: #111111;
+            color: #ffffff;
             font-size: 15px;
             cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            font-weight: 600;
         }
 
         .btn:hover {
-            background-color: #e3644a;
+            transform: translateY(-1px);
+            background: #000000;
         }
 
         .secondary-btn {
-            background-color: #777;
+            background: #ffffff;
+            color: #111111;
+            border: 1px solid rgba(0,0,0,0.18);
+            box-shadow: none;
         }
 
         .secondary-btn:hover {
-            background-color: #555;
+            background: rgba(0,0,0,0.04);
         }
 
         .message {
-            margin-top: 15px;
-            font-weight: bold;
+            margin-top: 12px;
+            font-weight: 700;
+            text-align: center;
+            color: #111111;
         }
     </style>
 </head>
