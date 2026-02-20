@@ -52,6 +52,121 @@ const fruitsPool = [
     "Watermelon"
 ];
 
+// Leftover manager storage helpers
+function getLeftovers() {
+    return JSON.parse(localStorage.getItem('leftovers')) || [];
+}
+
+function saveLeftovers(list) {
+    localStorage.setItem('leftovers', JSON.stringify(list));
+}
+
+function addLeftoverItem(name, qty) {
+    if (!name) return;
+    const list = getLeftovers();
+    const key = name.trim().toLowerCase();
+    const idx = list.findIndex(it => it.name.trim().toLowerCase() === key);
+    if (idx !== -1) {
+        list[idx].qty = Number(list[idx].qty) + Number(qty || 0);
+    } else {
+        list.push({ name: name.trim(), qty: Number(qty || 0) });
+    }
+    saveLeftovers(list);
+}
+
+function removeLeftover(index) {
+    const list = getLeftovers();
+    if (index >= 0 && index < list.length) {
+        list.splice(index, 1);
+        saveLeftovers(list);
+        // refresh the UI so the removed item disappears immediately
+        if (typeof showLeftoverManager === 'function') showLeftoverManager();
+    }
+}
+
+// UI: show leftover manager in menuDisplay
+function showLeftoverManager() {
+    const list = getLeftovers();
+    let html = `
+        <div style="max-width:520px; margin:10px auto; text-align:left;">
+            <h3>🥡 Leftover Manager</h3>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <input id="leftoverName" placeholder="Item name (e.g. Chappathi)" style="flex:1; padding:8px;" />
+                <button onclick="addLeftoverFromForm()">Add</button>
+            </div>
+            <div id="leftoverList">
+    `;
+
+    if (list.length === 0) {
+        html += `<p>No leftovers recorded.</p>`;
+    } else {
+        html += `<ul style="padding-left:18px;">`;
+        list.forEach((it, idx) => {
+            html += `<li>${it.name} — ${it.qty} <button onclick="removeLeftover(${idx})">Remove</button></li>`;
+        });
+        html += `</ul>`;
+    }
+
+    html += `
+            </div>
+            <div style="margin-top:12px; display:flex; gap:8px;">
+                <button onclick="suggestRecipesForLeftovers()">Suggest Recipes</button>
+                <button onclick="clearAllLeftovers()">Clear All</button>
+            </div>
+            <div id="leftoverSuggestions" style="margin-top:12px;"></div>
+        </div>
+    `;
+
+    document.getElementById('menuDisplay').innerHTML = html;
+}
+
+function addLeftoverFromForm() {
+    const name = document.getElementById('leftoverName').value;
+    const qty = 1;
+    if (!name) {
+        alert('Enter name');
+        return;
+    }
+    addLeftoverItem(name, qty);
+    showLeftoverManager();
+}
+
+function clearAllLeftovers() {
+    if (!confirm('Clear all leftovers?')) return;
+    saveLeftovers([]);
+    showLeftoverManager();
+}
+
+function suggestRecipesForLeftovers() {
+    const list = getLeftovers();
+    if (list.length === 0) {
+        document.getElementById('leftoverSuggestions').innerHTML = '<p>No leftovers to suggest recipes for.</p>';
+        return;
+    }
+
+    const map = {
+        'chappathi': ['Chappathi Roll'],
+        'chapathi': ['Chappathi Roll'],
+        'idli': ['Idli Upma'],
+        'dosa': ['Dosa Pizza'],
+        'kappa': ['Koth Kappa', 'Kappa Biriyani']
+    };
+
+    let out = '';
+    list.forEach(it => {
+        const name = it.name.toLowerCase();
+        let suggested = [];
+        Object.keys(map).forEach(key => {
+            if (name.includes(key)) suggested = suggested.concat(map[key]);
+        });
+        if (suggested.length === 0) suggested = ['No direct suggestion available'];
+        out += `<div style="margin-bottom:8px;"><strong>${it.name} (${it.qty})</strong>: ${suggested.join(', ')}</div>`;
+    });
+
+    out += `<p style="margin-top:8px; font-size:13px; color:#555;">Note: Suggested recipes will be applied automatically to <strong>tomorrow's</strong> breakfast when possible (consumes 1 qty).</p>`;
+    document.getElementById('leftoverSuggestions').innerHTML = out;
+}
+
 window.addEventListener("load", () => {
     localStorage.removeItem(confirmedMenuKey);
 });
@@ -270,6 +385,46 @@ function generateMenu() {
 
         let breakfast = pickFromList(breakfastItems, dayIndex, lastDayByItem);
         let breakfastCurry = "";
+
+        // Apply leftovers mapping for tomorrow's breakfast only
+        const leftovers = getLeftovers();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        if (leftovers.length > 0 && currentDate.toDateString() === tomorrow.toDateString()) {
+            // helper to find leftover index by keywords
+            function findLeftoverIndex(keywords) {
+                const k = keywords.map(s => s.toLowerCase());
+                return leftovers.findIndex(it => {
+                    const n = it.name.toLowerCase();
+                    return k.some(kw => n.includes(kw) && Number(it.qty) > 0);
+                });
+            }
+
+            // mappings
+            const chapIdx = findLeftoverIndex(['chappathi','chapathi','chapati','chapati']);
+            const idliIdx = findLeftoverIndex(['idli']);
+            const dosaIdx = findLeftoverIndex(['dosa']);
+            const kappaIdx = findLeftoverIndex(['kappa']);
+
+            if (chapIdx !== -1 && !isTooSoon('Chappathi', dayIndex, lastDayByItem)) {
+                breakfast = 'Chappathi Roll';
+                leftovers[chapIdx].qty = Math.max(0, leftovers[chapIdx].qty - 1);
+                saveLeftovers(leftovers);
+            } else if (idliIdx !== -1 && !isTooSoon('Idli', dayIndex, lastDayByItem)) {
+                breakfast = 'Idli Upma';
+                leftovers[idliIdx].qty = Math.max(0, leftovers[idliIdx].qty - 1);
+                saveLeftovers(leftovers);
+            } else if (dosaIdx !== -1 && !isTooSoon('Dosa', dayIndex, lastDayByItem)) {
+                breakfast = 'Dosa Pizza';
+                leftovers[dosaIdx].qty = Math.max(0, leftovers[dosaIdx].qty - 1);
+                saveLeftovers(leftovers);
+            } else if (kappaIdx !== -1 && !isTooSoon('Kappa', dayIndex, lastDayByItem)) {
+                const opts = ['Koth Kappa', 'Kappa Biriyani'];
+                breakfast = opts[Math.floor(Math.random() * opts.length)];
+                leftovers[kappaIdx].qty = Math.max(0, leftovers[kappaIdx].qty - 1);
+                saveLeftovers(leftovers);
+            }
+        }
 
         // Rule 1: Appam curry should be vegetable kuruma or chicken curry or egg curry
         if (breakfast === "Appam") {
