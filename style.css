@@ -190,3 +190,23 @@ form button {
 .health-btn:hover {
     background: #45a049;
 }
+
+.recipe-btn {
+    position: fixed;
+    top: 170px;
+    left: 20px;
+    padding: 10px 15px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-btn:hover {
+    background: #0b7dda;
+}
