@@ -239,7 +239,6 @@ Confirm Menu?
 
 - **Megha Ajith:** Frontend development, Menu generation algorithm, Health customization, UI design, Project documentation
 - **Anju Prakash:** Grocery management system, Leftover manager, Meal prep alerts, Recipe database
-- 
 ---
 
 ## License
