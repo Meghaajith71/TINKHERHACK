@@ -197,7 +197,7 @@ http://localhost:8080/index.html
 
 **Application Workflow:**
 
-![Workflow](```
+![Workflow]
 START
   ↓
 Create/Edit Profile
@@ -229,7 +229,6 @@ Confirm Menu?
   │   Next Week → Reset Menu
   │
   └─ NO → Regenerate Menu
-```)
 *An intelligent meal planning system that creates a personalized, nutritionally balanced weekly menu based on individual health conditions. It avoids repetition using a smart gap rule, ensures proper food combinations, and includes breakfast, lunch, and dinner planning. The system also supports meal prep reminders, grocery management, leftover tracking, and easy weekly resets for a healthier and more organized lifestyle.*
 
 ---
