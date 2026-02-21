@@ -116,20 +116,40 @@ http://localhost:8080/index.html
 
 
 
-## Project Documentation
-
-### For Software:
 
 #### Screenshots (Add at least 3)
 
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+![Menu Generation](<img width="1898" height="831" alt="image" src="https://github.com/user-attachments/assets/ae1b00d1-eb4b-44e0-a7ad-8a7792f859f9" />
+)
+*Intelligent 7-day menu with nutritional balance, health customization, and curry variety*
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+![Health Customization](<img width="1903" height="841" alt="image" src="https://github.com/user-attachments/assets/591010cd-0e9b-44ae-9915-b0de9a9a25c2" />
+)
+*Select from 5 health conditions: Default, Diabetic, Anemia, Weight Loss, High Protein*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+![Grocery Management](<img width="1910" height="831" alt="image" src="https://github.com/user-attachments/assets/6090b524-9b2e-43c9-93ad-577608cbc60c" />
+)
+*Grocery items adding*
+
+![Grocery Management](<img width="1900" height="843" alt="image" src="https://github.com/user-attachments/assets/dcd9d304-7229-4700-ac78-ada73a2a18cf" />
+)
+*Track grocery items with price, quantity and expiry dates*
+
+![Grocery Management](<img width="1906" height="828" alt="image" src="https://github.com/user-attachments/assets/7801cd5c-895b-44ff-a134-62a12569128e" />
+)
+*Track grocery items based on expiry dates*
+
+![Leftover Manager](<img width="1903" height="827" alt="image" src="https://github.com/user-attachments/assets/fef1098e-d447-4312-9754-8f4dde0a025d" />
+)
+*Manage leftovers - Add, Edit, Delete, and Set for tomorrow's breakfast*
+
+![Meal Prep Alerts](<img width="1901" height="831" alt="image" src="https://github.com/user-attachments/assets/f6de8a10-955c-41d6-b924-ffb8c0265646" />
+)
+*Black and white popup alerts for meal prep tasks and grocery expiry warnings*
+
+![Recipe Database](<img width="1892" height="829" alt="image" src="https://github.com/user-attachments/assets/32896a83-b647-41f4-8fd6-718abd174a87" />
+)
+*Store, search, and manage recipes with ingredients and preparation steps*
 
 #### Diagrams
 
